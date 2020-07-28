@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>小黑盒一键捕鱼</title>
+    <link rel="stylesheet" href="//cdnjs.loli.net/ajax/libs/mdui/0.4.3/css/mdui.min.css">
+</head>
+<body class="mdui-theme-primary-teal mdui-theme-accent-blue">
+    <div class="mdui-container">
+        <div class="mdui-row">
+            <div class="mdui-textfield mdui-textfield-floating-label">
+                <label class="mdui-textfield-label">小黑盒ID</label>
+                <input id="id" class="mdui-textfield-input"/>
+            </div>  
+            <div class="mdui-textfield mdui-textfield-floating-label">
+                <label class="mdui-textfield-label">目标分数</label>
+                <input id="score" class="mdui-textfield-input"/>
+            </div>  
+            <button class="mdui-btn mdui-center mdui-color-theme-accent mdui-ripple" onclick="Submit()">一键捕鱼</button>
+        </div>
+    </div>
+    <script src="//cdnjs.loli.net/ajax/libs/mdui/0.4.3/js/mdui.min.js"></script>
+    <script>   
+        function Submit(){
+            var id = document.getElementById("id").value;
+            var score = document.getElementById("score").value;
+            var data = "";
+            for (let t = ""+id+"_"+score+"",s = 0; s < t.length; s++) {
+                data += String.fromCharCode(t.charCodeAt(s) + t.length + s)
+            }
+            mdui.JQ.ajax({
+                method: 'POST',
+                url: 'https://api.xiaoheihe.cn/activity/heybox_third_anniversary_main/report/game_task',
+                data: "data=" + encodeURIComponent(data),
+                complete: function (xhr, textStatus){
+                    mdui.snackbar({
+                        message: '分数提交成功'
+                    });
+                }
+            });
+        };       
+    </script>
+</body>
+</html>
