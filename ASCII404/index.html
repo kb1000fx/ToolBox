@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>404页面打字机效果</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <link href="src/style.css" type="text/css" rel="stylesheet">
+    <link href="src/mdui.min.css" type="text/css" rel="stylesheet">
+</head>
+
+<body class="mdui-drawer-body-left mdui-drawer-body-right">
+    <div class="mdui-container">
+        <div id='ASCII404' class="mdui-hidden-xs-down">   
+            <span></span>                                                                                                                                                                   
+        </div> 
+        <div id="code">
+            <span class="comments">/*</span><br>
+            <span class="space"></span><span class="comments">* Sorry, the web page you asked for has been lost.</span><br />
+            <span class="space"></span><span class="comments">* Please check the link you input and refresh the browser.</span><br>
+            <span class="space"></span><span class="comments">* Type the codes below in console, you will find the 404 ASCII Art changed.</span><br>
+            <span class="space"></span><span class="comments">*/</span><br>
+            ((num)<span class="keyword">=></span>{<br>
+            <span class="placeholder"></span><span class="keyword">var</span> div = <span class="keyword">$$</span>("#ASCII404")[0];<br>
+            <span class="placeholder"></span><span class="keyword">var</span> str = <span class="string">"&lt;span&gt;"</span> + ascii404List[num] + <span class="string">"&lt;/span&gt;"</span>;<br>
+            <span class="placeholder"></span>div.innerHTML = str;<br>
+            })((<br>
+            <span class="placeholder"></span><span class="keyword">function</span>(){<br>
+            <span class="placeholder"></span><span class="placeholder"></span><span class="keyword">var</span> randNum = Math.random() * ascii404List.length;<br>
+            <span class="placeholder"></span><span class="placeholder"></span><span class="keyword">var</span> res = parseInt(randNum,10);<br>
+            <span class="placeholder"></span><span class="placeholder"></span><span class="keyword">return</span> res<br>
+            <span class="placeholder"></span>}<br>
+            )());
+        </div>
+    </div>
+    <script type="text/javascript" src="src/mdui.min.js"></script>
+    <script type="text/javascript" src="src/main.js"></script>
+</body>
+</html>
