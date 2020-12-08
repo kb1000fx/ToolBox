@@ -19,10 +19,11 @@
             location.reload();
         }, 3000);
     }else{
-        let str = $('.hellcase-btn-success.big.disabled.notavailable span').text();
-        let hr = Number(str.split(" ")[2]);
-        let min = Number(str.split(" ")[4]);
-        let time = (hr * 60 + min + 5) * 60;
+        let str = $('.hellcase-btn-success.big.disabled.notavailable span').text().split(" ");
+        let length = str.length;
+        let hr = Number(str[length-4])||0;
+        let min = Number(str[length-2]);
+        let time = (hr * 60 + min + 5) * 60 * 1000;
         console.log('Page will reload in ' + hr + " hours " + (min + 5) + " minutes.");
         setTimeout(() => {
             location.reload()
