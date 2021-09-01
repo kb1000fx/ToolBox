@@ -9,3 +9,5 @@ https://garybear.cn/tools/HeyBoxFishing/
 https://garybear.cn/404.html
 ## Docsify-Google-Adsense
 [用法说明](https://github.com/kb1000fx/ToolBox/blob/master/docsify-google-adsense/README.md)
+## SteamPyShowID
+在SteamPY上显示卖家的Steam 64位ID
