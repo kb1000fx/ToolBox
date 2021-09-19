@@ -24,7 +24,7 @@
                 jq(t).after(`
                     <td class="ivu-table-column-center">
                         <div class="ivu-table-cell">
-                            <div>${idList[i].steamId}</div> 
+                            <a target="_blank" href="https://steamcommunity.com/profiles/${idList[i].steamId}">${idList[i].steamId}</a> 
                         </div>
                     </td>
                 `);
