@@ -2,9 +2,9 @@
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
 // @version      0.1
-// @description  Fanatical批量刮key
+// @description  批量提取整理F站key
 // @author       kb1000fx
-// @match        https://www.fanatical.com/*
+// @match        https://www.fanatical.com/*/orders
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
 // @grant        GM_setClipboard
