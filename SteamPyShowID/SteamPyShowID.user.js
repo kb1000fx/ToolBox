@@ -8,27 +8,32 @@
 // @match        https://steampy.com/cdkDetail
 // @icon         https://steampy.com/img/logo.63413a4f.png
 // @grant        none
+// @updateURL    https://github.com/kb1000fx/ToolBox/raw/master/SteamPyShowID/SteamPyShowID.user.js
+// @downloadURL  https://github.com/kb1000fx/ToolBox/raw/master/SteamPyShowID/SteamPyShowID.user.js
 // ==/UserScript==
 
 (function() {
     'use strict';
     const jq=jQuery.noConflict();
-    jq(".market-content").ready(function(){      
-        setTimeout(function(){
-            const hd = jq(".ivu-table-header th")[1];
-            jq(hd).after(`<th id="tst-py" class="ivu-table-column-center"><div class="ivu-table-cell"><span class="">Steam64位ID</span></div></th>`);
-            const idList = jq(".market-content").prop("__vue__").data;
 
-            jq(".ivu-table-row").each(function(i,e){
-                const t = jq(e).children("td")[1];
-                jq(t).after(`
-                    <td class="ivu-table-column-center">
-                        <div class="ivu-table-cell">
-                            <a target="_blank" href="https://steamcommunity.com/profiles/${idList[i].steamId}">${idList[i].steamId}</a> 
-                        </div>
-                    </td>
-                `);
-            });
-        },500)
-    });
+    const init = ()=>{
+        const hd = jq(".ivu-table-header th")[1];
+        jq(hd).after(`<th id="tst-py" class="ivu-table-column-center"><div class="ivu-table-cell"><span class="">Steam64位ID</span></div></th>`);
+        const idList = jq(".market-content").prop("__vue__").data;
+
+        jq(".ivu-table-row").each(function(i,e){
+            const t = jq(e).children("td")[1];
+            jq(t).after(`
+                <td class="ivu-table-column-center">
+                    <div class="ivu-table-cell">
+                        <a target="_blank" href="https://steamcommunity.com/profiles/${idList[i].steamId}" style="color:rgb(81, 90, 110)">${idList[i].steamId}</a> 
+                    </div>
+                </td>
+            `);
+        });
+    };
+
+    window.onload = function(){
+        init();
+    };
 })();
