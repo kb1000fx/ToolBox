@@ -13,3 +13,5 @@ https://garybear.cn/404.html
 在SteamPY上显示卖家的Steam 64位ID
 ## FanaticalRevealKeys
 F站批量刮key整理
+## DirectGRevealKeys
+韩国站批量刮key整理

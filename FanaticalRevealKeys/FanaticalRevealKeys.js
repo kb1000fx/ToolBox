@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.1
+// @version      0.1.1
 // @description  批量提取整理F站key
 // @author       kb1000fx
 // @match        https://www.fanatical.com/*/orders
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
 // @grant        GM_setClipboard
-// @require      https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
 // @updateURL    https://github.com/kb1000fx/ToolBox/raw/master/FanaticalRevealKeys/FanaticalRevealKeys.js
 // @downloadURL  https://github.com/kb1000fx/ToolBox/raw/master/FanaticalRevealKeys/FanaticalRevealKeys.js
 // ==/UserScript==
@@ -56,7 +56,7 @@
     let sortedJson ={};
     let str = "";
 
-    const getRes = ()=>{
+    const getRes = async ()=>{
         orderIDList = [];
         unrevealedList = [];
         revealedList = [];
@@ -68,55 +68,50 @@
 
         for (let index = 0; index < orderIDList.length; index++) {
             const ID = orderIDList[index];
-            $.ajax({
-                async: false,
-                url: `https://www.fanatical.com/api/user/orders/${ID}`,
-                type: "GET",
+
+            await fetch(`https://www.fanatical.com/api/user/orders/${ID}`, {
+                method: 'GET',
                 headers: {
-                    anonid: JSON.parse(window.localStorage.bsanonymous).id,
-                    authorization: JSON.parse(window.localStorage.bsauth).token,
+                    'anonid': JSON.parse(window.localStorage.bsanonymous).id,
+                    'authorization': JSON.parse(window.localStorage.bsauth).token,
                     'content-type': 'application/json; charset=utf-8'
-                },
-                success: function(res) {
-                    if (res.status == "COMPLETE") {
-                        for (const item of res.items) {
-                            if (item.status == "fulfilled") {
-                                unrevealedList.push(item)
-                            } else if(item.status == "revealed") {
-                                revealedList.push({
-                                    name: item.name,
-                                    key: item.key,
-                                })
-                            } else {
-                                console.log(item)
-                            }
+                }
+            }).then(res => res.json()).then(res => {
+                if (res.status == "COMPLETE") {
+                    for (const item of res.items) {
+                        if (item.status == "fulfilled") {
+                            unrevealedList.push(item)
+                        } else if(item.status == "revealed") {
+                            revealedList.push({
+                                name: item.name,
+                                key: item.key,
+                            })
+                        } else {
+                            console.log(item)
                         }
-                    } else {
-                        console.log(`Order ${res._id} is ${res.status}`)
                     }
-                },
-            });
+                } else {
+                    console.log(`Order ${res._id} is ${res.status}`)
+                }
+            })
         }
     };
 
-    const revealKey = ()=>{
+    const revealKey = async ()=>{
         for (const item of unrevealedList) {
             let e = {};
-            e["name"] = item.name;          
-            $.ajax({
-                async: false,
-                url: `https://www.fanatical.com/api/user/orders/redeem`,
-                type: "POST",
+            e["name"] = item.name;    
+            await fetch(`https://www.fanatical.com/api/user/orders/redeem`, {
+                method: 'POST',
+                body: JSON.stringify(item),
                 headers: {
-                    anonid: JSON.parse(window.localStorage.bsanonymous).id,
-                    authorization: JSON.parse(window.localStorage.bsauth).token,
+                    'anonid': JSON.parse(window.localStorage.bsanonymous).id,
+                    'authorization': JSON.parse(window.localStorage.bsauth).token,
                     'content-type': 'application/json; charset=utf-8'
-                },
-                data: JSON.stringify(item),
-                success: function(res) {
-                    e["key"] = res.key;
-                    revealedList.push(e);
                 }
+            }).then(res => res.json()).then(res => {
+                e["key"] = res.key;
+                revealedList.push(e);
             })
         }
     };
@@ -154,13 +149,13 @@
     };
 
     const addListeners = ()=>{
-        $("#redeem-btn").click(()=>{
-            getRes();
-            revealKey();
+        $("#redeem-btn").click(async ()=>{
+            await getRes();
+            await revealKey();
             sortRes();
         });
-        $("#get-btn").click(()=>{
-            getRes();
+        $("#get-btn").click(async ()=>{
+            await getRes();
             sortRes();
         });
         $("#copy-btn").click(()=>{
