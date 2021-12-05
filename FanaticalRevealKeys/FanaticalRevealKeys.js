@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.1.2
+// @version      0.2
 // @description  批量提取整理F站key
 // @author       kb1000fx
-// @match        https://www.fanatical.com/*/orders*
+// @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]))$/
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
 // @grant        GM_setClipboard
@@ -87,10 +87,23 @@
                         if (item.status == "fulfilled") {
                             unrevealedList.push(item)
                         } else if(item.status == "revealed") {
-                            revealedList.push({
-                                name: item.name,
-                                key: item.key,
-                            })
+                            if (item.type == "game") {
+                                revealedList.push({
+                                    name: item.name,
+                                    key: item.key,
+                                })                            
+                            } else if (item.type == "bundle") {
+                                let gameList = [];
+                                for (const tier of item.bundles) {
+                                    gameList = [...gameList, ...tier.games]
+                                }
+                                for (const game of gameList) {
+                                    revealedList.push({
+                                        name: game.name,
+                                        key: game.key,
+                                    })  
+                                }
+                            }
                         } else {
                             console.log(item)
                         }
