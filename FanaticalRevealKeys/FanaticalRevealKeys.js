@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.2
+// @version      0.3
 // @description  批量提取整理F站key
 // @author       kb1000fx
 // @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]))$/
+// @include      /https://www\.fanatical\.com/[\S]*redeem-code$/
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
 // @grant        GM_setClipboard
@@ -21,7 +22,19 @@
 
     const cbxHTML = `
         <div class="checkbox">
-            <input type="checkbox" name="ordercbx"/>
+            <input type="checkbox" name="ordercbx"/>        
+        </div>
+    `;
+
+    const textHTML = `
+        <div id="redeem-input">
+            <p class="redeem-form-label">批量激活</p>
+            <div class="input-group">
+                <textarea class="form-control" rows="10"/>
+                <div class="input-group-append">
+                    <button id="redeem-code-btn" class="btn btn-primary">批量激活</button>
+                </div>
+            </div>
         </div>
     `;
 
@@ -160,9 +173,40 @@
         alert("结果已导出至剪切板")
     };
 
+    const redeemCodes = async ()=>{
+        let succ = 0;
+        const keys = $("#redeem-input textarea").val().split(/[(\r\n)\r\n]+/).filter(e=>e);
+        console.log(keys);
+        for (const key of keys) {
+            let flag = true;
+            const res = await fetch(`https://www.fanatical.com/api/user/redeem-code/redeem`, {
+                method: 'POST',
+	            body: JSON.stringify({
+                    code: key
+                }),
+                headers: {
+                    'anonid': JSON.parse(window.localStorage.bsanonymous).id,
+                    'authorization': JSON.parse(window.localStorage.bsauth).token,
+                    'content-type': 'application/json; charset=utf-8'
+                }
+            }).then(res => res.json()).catch(e=>{console.log(e);flag = false})
+            if (flag) {
+                console.log(res)
+                if (res._id) {
+                    succ += 1;
+                }
+            }
+        }
+        alert(`共激活${keys.length}个，成功${succ}个`)
+    };
+
     const initUI = ()=>{
-        $(".table-item").prepend(cbxHTML);
-        $(".order-search").after(panelHTML);
+        if (window.location.href.match(/https:\/\/www\.fanatical\.com\/[\S]*redeem-code$/)) {
+            $(".redeem-form").after(textHTML);
+        } else {
+            $(".table-item").prepend(cbxHTML);
+            $(".order-search").after(panelHTML);  
+        }
         GM_addStyle(css);
     };
 
@@ -178,6 +222,9 @@
         });
         $("#copy-btn").click(()=>{
             copyRes();
+        });
+        $("#redeem-code-btn").click(()=>{
+            redeemCodes()
         });
     };
 
