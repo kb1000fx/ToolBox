@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.3
+// @version      0.3.1
 // @description  批量提取整理F站key
 // @author       kb1000fx
 // @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]))$/
@@ -19,6 +19,7 @@
 (function(){
     'use strict';
     unsafeWindow.$ = $;
+    const showName = true;
 
     const cbxHTML = `
         <div class="checkbox">
@@ -159,7 +160,9 @@
         console.log(sortedJson); 
         for (const name in sortedJson) {
             const lst = sortedJson[name];
-            str += `\n${name}:\n`;    
+            if (showName) {
+                str += `\n${name}:\n`; 
+            }           
             for (const key of lst) {
                 str += `${key}\n`
             }
@@ -201,13 +204,30 @@
     };
 
     const initUI = ()=>{
+        GM_addStyle(css);
         if (window.location.href.match(/https:\/\/www\.fanatical\.com\/[\S]*redeem-code$/)) {
             $(".redeem-form").after(textHTML);
         } else {
             $(".table-item").prepend(cbxHTML);
             $(".order-search").after(panelHTML);  
+            replaceDate();
         }
-        GM_addStyle(css);
+    };
+
+    const replaceDate = ()=>{
+        fetch(`https://www.fanatical.com/api/user/orders`, {
+            method: 'GET',
+            headers: {
+                'anonid': JSON.parse(window.localStorage.bsanonymous).id,
+                'authorization': JSON.parse(window.localStorage.bsauth).token,
+                'content-type': 'application/json; charset=utf-8'
+            }
+        }).then(res => res.json()).then(res=>{
+            const els = $(".details-container .date-col");
+            for (let index = 0; index < els.length; index++) {
+                $(els[index]).html(new Date(res[index].date).toLocaleString())
+            }
+        })
     };
 
     const addListeners = ()=>{
