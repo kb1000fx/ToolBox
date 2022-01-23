@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.3.1
+// @version      0.4
 // @description  批量提取整理F站key
 // @author       kb1000fx
 // @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]))$/
@@ -19,7 +19,7 @@
 (function(){
     'use strict';
     unsafeWindow.$ = $;
-    const showName = true;
+    let gameTitles = [];
 
     const cbxHTML = `
         <div class="checkbox">
@@ -34,6 +34,13 @@
                 <textarea class="form-control" rows="10"/>
                 <div class="input-group-append">
                     <button id="redeem-code-btn" class="btn btn-primary">批量激活</button>
+                </div>
+            </div>
+            <p class="redeem-form-label">优惠券检验</p>
+            <div class="input-group">
+                <input type="text" id="voucher-input" class="form-control">
+                <div class="input-group-append">
+                    <button id="voucher-check-btn" class="btn btn-primary">优惠券检验</button>
                 </div>
             </div>
         </div>
@@ -59,6 +66,9 @@
         .tm-btn{
             margin-right: 20px;
         }
+        #redeem-input .input-group{
+            margin-bottom: 16px;
+        }
     `;
 
     const panelHTML = `
@@ -66,6 +76,9 @@
             <button id="redeem-btn" class="btn btn-primary tm-btn">刮Key</button>
             <button id="get-btn" class="btn btn-primary tm-btn">提取</button>
             <button id="copy-btn" class="btn btn-primary tm-btn">复制</button>
+            <input type="radio" name="oneCol" value="true" /> 纵向
+            <input type="radio" name="oneCol" value="false" checked /> 横向
+            <input type="checkbox" name="showName" checked /> 显示名称
         </div>
     `;
 
@@ -149,8 +162,13 @@
     };
 
     const sortRes = ()=>{
+        const showName = $("input[name='showName']").prop("checked")
+        console.log(showName)
+        const oneCol = JSON.parse($("input[name='oneCol']:checked").val())
+        console.log(oneCol)
         sortedJson ={};
         str = "";
+        let maxLegth = 0;
         for (const e of revealedList) {
             if(!(e.name in sortedJson)) {
                 sortedJson[e.name] = [];             
@@ -158,13 +176,32 @@
             sortedJson[e.name].push(e.key);
         }
         console.log(sortedJson); 
-        for (const name in sortedJson) {
-            const lst = sortedJson[name];
-            if (showName) {
-                str += `\n${name}:\n`; 
+        maxLegth = Math.max.apply(Math, Object.values(sortedJson).map((e)=>e.length))
+        if (oneCol) {
+            for (const name in sortedJson) {
+                const lst = sortedJson[name];
+                if (showName) {
+                    str += `${name}:\n`; 
+                }           
+                for (const key of lst) {
+                    str += `${key}\n`
+                }
             }           
-            for (const key of lst) {
-                str += `${key}\n`
+        } else {
+            if (!gameTitles.length) {
+                gameTitles = Object.keys(sortedJson)
+            }
+            if(showName){
+                str = gameTitles.join('\t') + '\n';
+            }
+            for (let index = 0; index < maxLegth; index++) {
+                for (const name of gameTitles) {
+                    let k = sortedJson[name][index]
+                    if (k) {
+                       str += k + '\t'
+                    }
+                }
+                str += '\n'
             }
         }
         copyRes();
@@ -201,6 +238,28 @@
             }
         }
         alert(`共激活${keys.length}个，成功${succ}个`)
+    };
+
+    const checkVoucher = async ()=>{
+        const voucher = $("#voucher-input").val()
+        const res = await fetch(`https://www.fanatical.com/api/user/discount`, {
+            method: 'POST',
+	        body: JSON.stringify({
+                discountCode: voucher
+            }),
+            headers: {
+                'anonid': JSON.parse(window.localStorage.bsanonymous).id,
+                'authorization': JSON.parse(window.localStorage.bsauth).token,
+                'content-type': 'application/json; charset=utf-8'
+            }
+        })
+        if (res.status == 200) {
+            const rs = await res.json()
+            console.log(rs)
+            alert(`名称: ${rs.name}\n优惠券: ${rs.code}\n有效期至: ${rs.valid_until}`)
+        } else if(res.status == 400){
+            alert(`${voucher} 已过期`)
+        }
     };
 
     const initUI = ()=>{
@@ -245,6 +304,9 @@
         });
         $("#redeem-code-btn").click(()=>{
             redeemCodes()
+        });
+        $("#voucher-check-btn").click(()=>{
+            checkVoucher()
         });
     };
 
