@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.4
+// @version      0.5
 // @description  批量提取整理F站key
 // @author       kb1000fx
-// @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]))$/
+// @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]*))$/
 // @include      /https://www\.fanatical\.com/[\S]*redeem-code$/
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
@@ -97,7 +97,7 @@
             orderIDList.push( orderStr.split("/")[3] ); 
         });        
         console.log(`已选择 ${orderIDList.length}个订单`);
-
+        let gameList = [];
         for (let index = 0; index < orderIDList.length; index++) {
             const ID = orderIDList[index];
 
@@ -109,27 +109,14 @@
                     'content-type': 'application/json; charset=utf-8'
                 }
             }).then(res => res.json()).then(res => {
-                if (res.status == "COMPLETE") {
+                console.log(res)
+                if (res.status == "COMPLETE") { 
                     for (const item of res.items) {
-                        if (item.status == "fulfilled") {
-                            unrevealedList.push(item)
-                        } else if(item.status == "revealed") {
-                            if (item.type == "game") {
-                                revealedList.push({
-                                    name: item.name,
-                                    key: item.key,
-                                })                            
-                            } else if (item.type == "bundle") {
-                                let gameList = [];
-                                for (const tier of item.bundles) {
-                                    gameList = [...gameList, ...tier.games]
-                                }
-                                for (const game of gameList) {
-                                    revealedList.push({
-                                        name: game.name,
-                                        key: game.key,
-                                    })  
-                                }
+                        if (item.type == "game") {
+                            gameList.push(item)
+                        } else if (item.type == "bundle") {
+                            for (const tier of item.bundles) {
+                                gameList = [...gameList, ...tier.games]
                             }
                         } else {
                             console.log(item)
@@ -139,6 +126,18 @@
                     console.log(`Order ${res._id} is ${res.status}`)
                 }
             })
+            console.log(gameList)
+            for (let index = 0; index < gameList.length; index++) {
+                const game = gameList[index];
+                if (game.status == "revealed") {          
+                    revealedList.push({
+                        name: game.name,
+                        key: game.key,
+                    })                            
+                } else if (game.status == "fulfilled") {
+                    unrevealedList.push(game)
+                }
+            }
         }
     };
 
@@ -310,8 +309,15 @@
         });
     };
 
-    window.onload = function(){
-        initUI();
-        addListeners();      
-    };  
+    (()=>{
+        const init_timer = setInterval(()=>{
+            const status1 = $(".table-item").length;
+            const status2 = $(".redeem-form").length;
+            if (status1 || status2) {
+                clearInterval(init_timer);
+                initUI();
+                addListeners();    
+            }
+        }, 200)
+    })();
 })();
