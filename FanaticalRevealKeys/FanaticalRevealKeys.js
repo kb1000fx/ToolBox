@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Fanatical批量刮key
 // @namespace    kb1000fx
-// @version      0.5
+// @version      0.6
 // @description  批量提取整理F站key
 // @author       kb1000fx
-// @include      /https://www\.fanatical\.com/[\S]*((/orders)|(/orders\?page=[0-9]*))$/
+// @include      https://www.fanatical.com/*
 // @include      /https://www\.fanatical\.com/[\S]*redeem-code$/
 // @icon         https://cdn.fanatical.com/production/icons/favicon-32x32.png
 // @grant        GM_addStyle
@@ -12,8 +12,6 @@
 // @grant        unsafeWindow
 // @grant        window.onload
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
-// @updateURL    https://github.com/kb1000fx/ToolBox/raw/master/FanaticalRevealKeys/FanaticalRevealKeys.js
-// @downloadURL  https://github.com/kb1000fx/ToolBox/raw/master/FanaticalRevealKeys/FanaticalRevealKeys.js
 // ==/UserScript==
 
 (function(){
@@ -76,8 +74,6 @@
             <button id="redeem-btn" class="btn btn-primary tm-btn">刮Key</button>
             <button id="get-btn" class="btn btn-primary tm-btn">提取</button>
             <button id="copy-btn" class="btn btn-primary tm-btn">复制</button>
-            <input type="radio" name="oneCol" value="true" /> 纵向
-            <input type="radio" name="oneCol" value="false" checked /> 横向
             <input type="checkbox" name="showName" checked /> 显示名称
         </div>
     `;
@@ -100,7 +96,6 @@
         let gameList = [];
         for (let index = 0; index < orderIDList.length; index++) {
             const ID = orderIDList[index];
-
             await fetch(`https://www.fanatical.com/api/user/orders/${ID}`, {
                 method: 'GET',
                 headers: {
@@ -127,18 +122,18 @@
                 }
             })
             console.log(gameList)
-            for (let index = 0; index < gameList.length; index++) {
+        }
+        for (let index = 0; index < gameList.length; index++) {
                 const game = gameList[index];
-                if (game.status == "revealed") {          
+                if (game.status == "revealed") {
                     revealedList.push({
                         name: game.name,
                         key: game.key,
-                    })                            
+                    })
                 } else if (game.status == "fulfilled") {
                     unrevealedList.push(game)
                 }
-            }
-        }
+       }
     };
 
     const revealKey = async ()=>{
@@ -162,9 +157,6 @@
 
     const sortRes = ()=>{
         const showName = $("input[name='showName']").prop("checked")
-        console.log(showName)
-        const oneCol = JSON.parse($("input[name='oneCol']:checked").val())
-        console.log(oneCol)
         sortedJson ={};
         str = "";
         let maxLegth = 0;
@@ -176,33 +168,16 @@
         }
         console.log(sortedJson); 
         maxLegth = Math.max.apply(Math, Object.values(sortedJson).map((e)=>e.length))
-        if (oneCol) {
-            for (const name in sortedJson) {
-                const lst = sortedJson[name];
-                if (showName) {
-                    str += `${name}:\n`; 
-                }           
-                for (const key of lst) {
-                    str += `${key}\n`
-                }
+        for (const name in sortedJson) {
+            const lst = sortedJson[name];
+            if (showName) {
+              str += `\n${name}:\n`;
             }           
-        } else {
-            if (!gameTitles.length) {
-                gameTitles = Object.keys(sortedJson)
+            for (const key of lst) {
+                str += `${key}\n`
             }
-            if(showName){
-                str = gameTitles.join('\t') + '\n';
-            }
-            for (let index = 0; index < maxLegth; index++) {
-                for (const name of gameTitles) {
-                    let k = sortedJson[name][index]
-                    if (k) {
-                       str += k + '\t'
-                    }
-                }
-                str += '\n'
-            }
-        }
+         }           
+
         copyRes();
     };
 
